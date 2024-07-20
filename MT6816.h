@@ -1,8 +1,7 @@
 #pragma once
 
 // RPdenBoer July 2024
-// To encapsulate reading and writing registers of the MT6816 encoder IC
-// TODO: Add error handling and party checking
+// Encapsulate reading and writing some relevant registers of the MT6816 encoder IC
 
 #include <Arduino.h>
 #include <SPI.h>
@@ -50,6 +49,11 @@ public:
         uint8_t lowByte = readRegister(MT6816_ANGLE_LSB);
 
         uint16_t combined = (highByte << 8) | lowByte;
+
+        if (!parityCheck(combined))
+        {
+            return 0;
+        }
 
         // Downshift two bits (discard them)
         return combined >> 2;
@@ -116,6 +120,16 @@ private:
 
         SPI.endTransaction();
         digitalWrite(_selectPin, HIGH);
+    }
+
+    bool parityCheck(uint16_t data)
+    {
+        data ^= data >> 8;
+        data ^= data >> 4;
+        data ^= data >> 2;
+        data ^= data >> 1;
+
+        return (~data) & 1;
     }
 
     uint32_t _selectPin;
