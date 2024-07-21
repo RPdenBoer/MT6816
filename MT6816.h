@@ -40,6 +40,8 @@ public:
         digitalWrite(_selectPin, HIGH);
 
         SPI.begin();
+
+        SPI.beginTransaction(settings);
     }
 
     uint16_t readAngle()
@@ -98,12 +100,10 @@ private:
         uint16_t command = (0x80 | address) << 8;
 
         digitalWrite(_selectPin, LOW);
-        SPI.beginTransaction(settings);
 
         uint16_t data = SPI.transfer16(command);
         Serial.println(data, BIN);
 
-        SPI.endTransaction();
         digitalWrite(_selectPin, HIGH);
 
         return (data & 0xFF);
@@ -114,11 +114,9 @@ private:
         uint16_t command = (address & 0x7F) << 8 | data;
 
         digitalWrite(_selectPin, LOW);
-        SPI.beginTransaction(settings);
 
         SPI.transfer16(command);
 
-        SPI.endTransaction();
         digitalWrite(_selectPin, HIGH);
     }
 
